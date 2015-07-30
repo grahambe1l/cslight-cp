@@ -1,0 +1,137 @@
+<aura:component controller="CS_LightningCalendarController" implements="flexipage:availableForAllPageTypes">
+    <!--<ltng:require scripts="/resource/1436183533000/CS_FullCalendar/lib/moment.min.js,/resource/1436183533000/CS_FullCalendar/lib/jquery.min.js,/resource/1436183533000/CS_FullCalendar/fullcalendar.js"
+    styles="/resource/1436183533000/CS_FullCalendar/fullcalendar.css" afterScriptsLoaded="{!c.doInit}"/>-->
+
+<ltng:require scripts="/resource/1437404838000/CS_FullCalendar2/js/plugins/fullcalendar/moment.min.js,
+/resource/1437404838000/CS_FullCalendar2/js/jquery-2.1.1.js,
+/resource/1437404838000/CS_FullCalendar2/js/bootstrap.min.js,
+/resource/1437404838000/CS_FullCalendar2/js/plugins/metisMenu/jquery.metisMenu.js,
+/resource/1437404838000/CS_FullCalendar2/js/plugins/slimscroll/jquery.slimscroll.min.js,
+/resource/1437404838000/CS_FullCalendar2/js/jquery-ui.custom.min.js,
+/resource/1437404838000/CS_FullCalendar2/js/plugins/iCheck/icheck.min.js,
+/resource/1437404838000/CS_FullCalendar2/js/plugins/fullcalendar/fullcalendar.min.js"
+styles="/resource/1437404838000/CS_FullCalendar2/css/bootstrap.min.css,
+/resource/1437404838000/CS_FullCalendar2/css/plugins/fullcalendar/fullcalendar.css,
+/resource/1437404838000/CS_FullCalendar2/css/animate.css,
+/resource/1437404838000/CS_FullCalendar2/css/style.css" afterScriptsLoaded="{!c.doInit}"/>
+    <aura:attribute name="ready" type="Boolean" default="false"/>
+	<aura:attribute name="today" type="Date" default=""/>    
+    <body class="skin-2">
+    <div id="wrapper">
+    <div class="wrapper wrapper-content">
+        <div class="row animated fadeInDown">
+            <div class="col-lg-3">
+                <div class="ibox float-e-margins">
+                    <!-- Actions required:
+                        - We need to tie in the save method to save the event to the events object
+						- Required:
+							- Create method in controller to save event to the apex class defined at the top of this page
+							- Add a create method to the apex class to save the event
+                    -->
+                    <div class="ibox-title">
+                        <h5>Create Event</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="fa fa-wrench"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user">
+                                <li><a href="#">Config option 1</a>
+                                </li>
+                                <li><a href="#">Config option 2</a>
+                                </li>
+                            </ul>
+                            <a class="close-link">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <p>Please fill out the details below to create an event.</p>
+                            <ui:inputText aura:id="title" label="Title:" class="field" value="" />
+    						<ui:inputText aura:id="description" label="Description" class="field" value="" />    
+    						<ui:inputDateTime aura:id="today" label="Start:" class="field" value="" displayDatePicker="true" />
+    						<ui:inputDateTime aura:id="today" label="End:" class="field" value="" displayDatePicker="true" />
+    						<ui:button class="btn btn-w-m btn-warning" label="Create Event" press="{!c.createEvent}"/> 
+                    </div>
+                </div>
+
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>Drag an Event</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="close-link">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <div id='external-events'>
+                            <p>Drag a event and drop into calendar to create an event.</p>
+                            <div class='external-event blue-bg'>Meeting</div>
+                            <div class='external-event blue-bg'>Call</div>
+                            <div class='external-event blue-bg'>Email</div>
+                            <div class='external-event blue-bg'>
+                            Send Letter / Quote
+                            </div>
+                            <div class='external-event blue-bg'>Other</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>My Calendar</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="close-link">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <div aura:id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Actions required:
+	- We need to tie the following modal window into the event details within the calendar javascript method
+	- We also need to tie in the save method to save the event to the events object
+-->
+<div class="modal inmodal" id="calendarModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Event Details</h4>
+            </div>
+            <div class="modal-body">
+                <p><strong>Please fill in the details to create the event:</strong> </p>
+                <div class="form-group">
+                 <ui:inputText aura:id="title" label="Title:" class="form-control" value="" />
+    			 <ui:inputText aura:id="description" label="Description:" class="form-control" value="" />    
+    			 <ui:inputDateTime aura:id="today" label="Start:" class="form-control" value="" displayDatePicker="true" />
+    			 <ui:inputDateTime aura:id="today" label="End:" class="form-control" value="" displayDatePicker="true" />
+    			 <ui:button class="btn btn-primary" label="Save Changes" press="{!c.createEvent}"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+</aura:component>

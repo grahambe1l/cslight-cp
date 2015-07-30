@@ -1,0 +1,3 @@
+<design:component>
+	<design:attribute name="maxDistance" label="Max Distance" description="Maximum distance to search for nearby Contacts" />
+</design:component>
